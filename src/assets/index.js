@@ -1,0 +1,1 @@
+export const BRAND_LOGO = require("./img/brand/argon-react.png");
