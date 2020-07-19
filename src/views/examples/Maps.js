@@ -16,102 +16,155 @@
 
 */
 import React from "react";
-// react plugin used to create google maps
-import {
-  withScriptjs,
-  withGoogleMap,
-  GoogleMap,
-  Marker
-} from "react-google-maps";
-
+// react component that copies the given text inside your clipboard
+import { CopyToClipboard } from "react-copy-to-clipboard";
 // reactstrap components
-import { Card, Container, Row } from "reactstrap";
-
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  FormGroup,
+  Form,
+  Input,
+  Container,
+  Row,
+  Col,
+  Table
+} from "reactstrap";
 // core components
 import Header from "../../components/Headers/Header.js";
-// mapTypeId={google.maps.MapTypeId.ROADMAP}
-const MapWrapper = withScriptjs(
-  withGoogleMap(props => (
-    <GoogleMap
-      defaultZoom={12}
-      defaultCenter={{ lat: 40.748817, lng: -73.985428 }}
-      defaultOptions={{
-        scrollwheel: false,
-        styles: [
-          {
-            featureType: "administrative",
-            elementType: "labels.text.fill",
-            stylers: [{ color: "#444444" }]
-          },
-          {
-            featureType: "landscape",
-            elementType: "all",
-            stylers: [{ color: "#f2f2f2" }]
-          },
-          {
-            featureType: "poi",
-            elementType: "all",
-            stylers: [{ visibility: "off" }]
-          },
-          {
-            featureType: "road",
-            elementType: "all",
-            stylers: [{ saturation: -100 }, { lightness: 45 }]
-          },
-          {
-            featureType: "road.highway",
-            elementType: "all",
-            stylers: [{ visibility: "simplified" }]
-          },
-          {
-            featureType: "road.arterial",
-            elementType: "labels.icon",
-            stylers: [{ visibility: "off" }]
-          },
-          {
-            featureType: "transit",
-            elementType: "all",
-            stylers: [{ visibility: "off" }]
-          },
-          {
-            featureType: "water",
-            elementType: "all",
-            stylers: [{ color: "#5e72e4" }, { visibility: "on" }]
-          }
-        ]
-      }}
-    >
-      <Marker position={{ lat: 40.748817, lng: -73.985428 }} />
-    </GoogleMap>
-  ))
-);
+import Axios from "axios";
 
-class Maps extends React.Component {
+class Icons extends React.Component {
+  state = {
+    latitude: '',
+    longitude: '',
+    distance: '1000',
+    studentData: [],
+  }
+
+  handleSubmit = async (e) => {
+    e.preventDefault();
+    const id = this.props.match.params.id;
+    const result = await Axios.get("http://localhost:3000/api/StudentService/getstudentnearme?latitude="
+      + this.state.latitude + "&longitude=" + this.state.longitude + "&distance=" + this.state.distance);
+    this.setState({studentData: result.data})
+  }
+
+  handleChange = (e) => {
+    this.setState({ [e.currentTarget.name]: e.currentTarget.value });
+  }
+  renderStudentTable = () => {
+    return this.state.studentData.map(student => {
+      return (
+        <tr>
+          <td>{student.name}</td>
+          <td>{student.class}</td>
+        </tr>
+      )
+    })
+  }
+
   render() {
     return (
       <>
         <Header />
         {/* Page content */}
-        <Container className="mt--7" fluid>
+        <Container className=" mt--7" fluid>
+          {/* Table */}
           <Row>
-            <div className="col">
-              <Card className="shadow border-0">
-                <MapWrapper
-                  googleMapURL="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"
-                  loadingElement={<div style={{ height: `100%` }} />}
-                  containerElement={
-                    <div
-                      style={{ height: `600px` }}
-                      className="map-canvas"
-                      id="map-canvas"
-                    />
-                  }
-                  mapElement={
-                    <div style={{ height: `100%`, borderRadius: "inherit" }} />
-                  }
-                />
+            <Col className="order-xl-1" xl="12">
+              <Card className="bg-secondary shadow">
+                <CardHeader className="bg-white border-0">
+                  <Row className="align-items-center">
+                    <Col xs="8">
+                      <h3 className="mb-0">Find Students By Location</h3>
+                    </Col>
+                  </Row>
+                </CardHeader>
+                <CardBody>
+                  <Form onSubmit={this.handleSubmit}>
+                    <div className="pl-lg-4">
+                      <Row>
+                        <Col lg="4">
+                          <FormGroup>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-first-name"
+                            >
+                              Latitude
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              onChange={this.handleChange}
+                              value={this.state.latitude}
+                              id="input-first-name"
+                              placeholder="Latitude"
+                              type="text"
+                              name="latitude"
+                            />
+                          </FormGroup>
+                        </Col>
+                        <Col lg="4">
+                          <FormGroup>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-last-name"
+                            >
+                              Longitude
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              onChange={this.handleChange}
+                              value={this.state.longitude}
+                              id="input-last-name"
+                              placeholder="Longitude"
+                              type="text"
+                              name="longitude"
+                            />
+                          </FormGroup>
+                        </Col>
+                        <Col lg="4">
+                          <FormGroup>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-first-name"
+                            >
+                              Distance (in Meters)
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              onChange={this.handleChange}
+                              value={this.state.distance}
+                              id="input-first-name"
+                              placeholder="Distance"
+                              type="text"
+                              name="distance"
+                            />
+                          </FormGroup>
+                        </Col>
+                        <Col lg="2">
+                          <FormGroup>
+                            <button type='submit' className='btn btn-success' onClick={this.handleSubmit}>Search</button>
+                          </FormGroup>
+                        </Col>
+                      </Row>
+                    </div>
+                  </Form>
+                  <Table className="align-items-center table-flush" responsive>
+                    <thead className="thead-light">
+                      <tr>
+                        <th scope="col">Student Name</th>
+                        <th scope="col">Class</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {this.renderStudentTable()}
+                    </tbody>
+                  </Table>
+                </CardBody>
               </Card>
-            </div>
+            </Col>
           </Row>
         </Container>
       </>
@@ -119,4 +172,4 @@ class Maps extends React.Component {
   }
 }
 
-export default Maps;
+export default Icons;

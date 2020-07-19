@@ -8,9 +8,7 @@ import AdminNavbar from "../components/Navbars/AdminNavbar.js";
 import AdminFooter from "../components/Footers/AdminFooter.js";
 import Sidebar from "../components/Sidebar/Sidebar.js";
 import { BRAND_LOGO } from "../assets/index";
-
 import routes from "../routes";
-
 class Admin extends React.Component {
   componentDidUpdate(e) {
     document.documentElement.scrollTop = 0;
